@@ -11,7 +11,7 @@ router.post('/signUpAsBuyer', upload.single('image'), async(req,res)=>{
   try{
 
     let data = await buyerCollection.findOne({email : req.body.email})
-    if(data) return res.status(400).send("User already Exist"); 
+    if(data) return res.status(200).send(false  ); 
 
     const imagePath = path.join(__dirname, '../public/images');
     const fileUpload = new resize(imagePath);
@@ -29,7 +29,7 @@ router.post('/signUpAsBuyer', upload.single('image'), async(req,res)=>{
     await buyer.generateHashedPassword();
     buyer.save();
 
-    res.status(200).send(buyer + " Saved")
+    res.status(200).send(true)
   }catch(err){
     console.log(err.message);
     res.status(400).send(err.messsage);
@@ -49,14 +49,15 @@ router.post("/signInAsBuyer",async (req, res)=>{
       id : buyer._id,
       name : buyer.name,
       email : buyer.email,
-      image : buyer.image
+      image : buyer.image,
+      loggedIn : true
     }
 
     let token  = jwt.sign(payload,process.env.jwtkey)
-    res.status(200).send(token)
+    res.status(200).send({token : token ,payload : payload})
     console.log(req.body.email + " login ");
 
-  }catch(err){
+  }catch(err){  
     console.log(err.message)
     res.status(400).send(err.message)
   }
@@ -79,7 +80,7 @@ router.post("/signInAsBuyer",async (req, res)=>{
   router.get("/currentUser" ,async (req ,res)=>{
       //check provide  in header
       let token = req.headers["token"];
-      if (!token) return res.send("Token is no Provided");
+      if (!token) return res.status(400).send("Token is no Provided");
 
       //here i decode the token which contain  user detail and token
       try {

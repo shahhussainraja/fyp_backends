@@ -14,7 +14,11 @@ const buyer = new mongodb.Schema({
     },
     password: String,
     phone: Number,
-    image: String
+    image : String,
+    userType : {
+      type : String ,
+      default  : "buyer"
+  }
 })
  
 buyer.methods.generateHashedPassword = async function() {
