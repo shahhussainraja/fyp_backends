@@ -18,15 +18,18 @@ router.post("/uploadPost",upload.single("image"),async(req, res)=>{
 
     const post = new postCollection
     post.buyerId = req.body.buyerId,
-    post.postTitle = req.body.postTitle,
-    post.postDetail = req.body.postDetail,
-    post.price = req.body.price,
+    post.buyerName = req.body.buyerName,
+    post.postTitle = req.body.title,
+    post.postDetail = req.body.detail,
+    post.dueDate = req.body.dueDate,
+    post.city = req.body.city,
+    post.price = req.body.amount,
     post.image = "/images/"+filename,
-    post.deliveryLocation = req.body.deliveryLocation,
+    post.deliveryLocation = req.body.address,
     post.category = req.body.category,
     await post.save();
     console.log(post + " Saved")
-    res.status(200).send(post + " Saved")
+    res.status(200).send(true)
 
     }catch(err){
         console.log(err.message);
@@ -34,7 +37,7 @@ router.post("/uploadPost",upload.single("image"),async(req, res)=>{
     }
 })
 
-router.get("/getAllPost",async(req,res)=>{
+router.get("/fetchAllPost",async(req,res)=>{
     try{
         let data = await postCollection.find();
         if(!data)

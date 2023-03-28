@@ -9,6 +9,10 @@ const post = new mongodb.Schema({
         type : String,
         required : true
     },
+    buyerName : {
+        type : String,
+        requried : true
+    },
     postTitle : {
       type: String,
       required : true
@@ -27,6 +31,12 @@ const post = new mongodb.Schema({
       required:true
     },
     category:{
+      type:String,
+      required:true
+    },dueDate:{
+      type:String,
+      required:true
+    },city:{
       type:String,
       required:true
     },
