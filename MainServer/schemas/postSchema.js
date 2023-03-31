@@ -5,7 +5,7 @@ const { date } = require("joi");
 
 
 const post = new mongodb.Schema({
-    buyerId: {
+    buyerId:{
         type : String,
         required : true
     },
