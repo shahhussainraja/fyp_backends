@@ -16,6 +16,7 @@ var postRouter = require('./routes/postRoutes');
 var conversationRoute = require("./routes/conversationRoutes")
 var messageRoute = require("./routes/messageRoutes")
 var sellerProfilRoute = require("./routes/sellerProfileRoutes")
+var payment = require("./routes/paymentRoute")
 
 var app = express();
 
@@ -45,6 +46,7 @@ app.use('/bespoke', postRouter);
 app.use('/bespoke', conversationRoute);
 app.use('/bespoke', messageRoute);
 app.use('/bespoke', sellerProfilRoute);
+app.use('/bespoke', payment);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

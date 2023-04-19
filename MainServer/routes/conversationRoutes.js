@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 const conversation = require("../schemas/Conversation");
-const Conversation = require('../schemas/Conversation');
 
 
 //new Conversation 
@@ -18,7 +17,6 @@ router.post("/newConversation", async(req, res)=>{
                     if (flag) return res.status(200).send(fetchConverstion[x])
                 }
             }
-
                 const newConversation = new conversation({
                 members : [req.body.senderId, req.body.receiverId]
                 });

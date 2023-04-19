@@ -11,7 +11,7 @@ router.post('/signUpAsBuyer', upload.single('image'), async(req,res)=>{
   try{
 
     let data = await buyerCollection.findOne({email : req.body.email})
-    if(data) return res.status(200).send(false  ); 
+    if(data) return res.status(200).send(false); 
 
     const imagePath = path.join(__dirname, '../public/images');
     const fileUpload = new resize(imagePath);
@@ -40,22 +40,23 @@ router.post("/signInAsBuyer",async (req, res)=>{
   try{
 
     let buyer = await buyerCollection.findOne({ email : req.body.email })
-    if(!buyer) return res.status(400).send(false)
+    if(!buyer) return res.status(401).send(false)
 
     let isValid = await bcrypt.compare(req.body.password, buyer.password)
-    if(!isValid) return res.status(400).send(false)
+    if(!isValid) return res.status(401).send(false)
 
     let payload = {
       id : buyer._id,
       name : buyer.name,
       email : buyer.email,
       image : buyer.image,
-      loggedIn : true
+      loggedIn : true,
+      userType : buyer.userType
     }
 
     let token  = jwt.sign(payload,process.env.jwtkey)
     res.status(200).send({token : token ,payload : payload})
-    console.log(req.body.email + " login ");
+    console.log(req.body.email + "buyer login ");
 
   }catch(err){  
     console.log(err.message)
@@ -74,7 +75,7 @@ router.post("/signInAsBuyer",async (req, res)=>{
   }catch(err){
     console.log(err.message)
     res.status(400).send(err.message)
-  }
+  }   
   })
 
   router.get("/currentUser" ,async (req ,res)=>{

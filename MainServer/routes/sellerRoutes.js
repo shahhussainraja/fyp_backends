@@ -50,21 +50,24 @@ router.post("/signInAsSeller",async (req, res)=>{
   try{
 
     let seller = await sellerCollection.findOne({ email : req.body.email })
-    if(!seller) return res.status(400).send(false)
+    if(!seller) return res.status(401).send(false)
 
     let isValid = await bcrypt.compare(req.body.password, seller.password)
-    if(!isValid) return res.status(400).send(false)
+    if(!isValid) return res.status(401).send(false)
 
     let payload = {
       id : seller._id,
       name : seller.name,
       email : seller.email,
-      image : seller.image
+      image : seller.image,
+      loggedIn : true,
+      userType : seller.userType
     }
+    
 
     let token  = jwt.sign(payload,process.env.jwtkey)
-    res.status(200).send(token)
-    console.log(req.body.email + " login ");
+    res.status(200).send({token : token ,payload : payload})
+    console.log(req.body.email + "Seller login ");
 
   }catch(err){
     console.log(err.message)
@@ -85,6 +88,7 @@ router.post("/signInAsSeller",async (req, res)=>{
       res.status(400).send(err.message)
   }
   })
+
 
   router.get("/currentUser" ,async (req ,res)=>{
       //check provide  in header
