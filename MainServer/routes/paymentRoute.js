@@ -1,19 +1,33 @@
 var express = require('express');
 var router = express.Router();
 const orderModel = require("../schemas/orderSchema");
+const { string } = require('joi');
 require('dotenv').config({path: __dirname + '/.env'})
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 
-  router.post("/makePayment",async(req,res)=>{
 
-    let  routes ={
-        success_url : "http://localhost:3000/PaymentSuccess",
-        cancel_url : "http://localhost:3000/Post"
+//for event trigger webhook
+// stripe listen --forward-to localhost:8080/bespoke/webhook
+//Run his command on your powershell
 
-    }
-
-    console.log(req.body);
+ router.post("/makePayment",async(req,res)=>{
+    
+    let orderDetail = [{
+            buyerId:req.body.buyerId,
+            buyerName : req.body.buyerName,
+            sellerId: req.body.sellerId,
+            sellerName : req.body.sellerName,
+            postTitle: req.body.postTitle,
+            postDetail: req.body.postDetail,
+            amount:req.body.amount,      
+  }]
+    const customer = await stripe.customers.create({
+        metadata: {
+            order : JSON.stringify(orderDetail)
+        },
+      });
+    // console.log(req.body);
     // const { product, routes } = req.body;
 
     try{
@@ -32,20 +46,115 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
             },
             quantity: req.body.quantity || 1 ,
         }],
-        
+        customer : customer.id,
         mode: "payment",
-        success_url: routes.success_url,
-        cancel_url: routes.cancel_url,
+        success_url: `${process.env.success_url}`,
+        cancel_url: `${process.env.cancel_url}`,
     });
-    res.json({ url  : session.url });
+    res.json({url  : session.url, });
+
+    // const session2 = await stripe.checkout.sessions.retrieve(req.query.session_id);
+    // const paymentIntent = await stripe.paymentIntents.retrieve(session2.payment_intent);
+    // res.json(paymentIntent);
+
 }catch(e){
     res.status(400).send(e.message);
-
 }
        
-  })
+})
+
+//Create order for DataBase
+
+// Create order function
+
+const createOrder = async (customer, data) => {
+    const orderDetail = JSON.parse(customer.metadata.order);
+    let productsItems = [];
+    orderDetail.map((data)=>{
+        productsItems.push({
+            postTitle:data.postTitle,
+            postDetail:data.postDetail,
+            amount : data.amount
+        })
+    })
+
+    const order = new orderModel({
+        buyerId: orderDetail[0]?.buyerId,
+        buyerName: orderDetail[0]?.buyerName,
+        sellerId : orderDetail[0]?.sellerId  ,
+        sellerName: orderDetail[0]?.sellerName, 
+        paymentIntentId: data.payment_intent,
+        products:productsItems,
+        totalAmount: data.amount_total,
+        deliveryAddress: data.customer_details?.address.line1,
+        city:data.customer_details?.address.city,
+        postalCode:data.customer_details?.address.postal_code,
+        payment_status: data.payment_status,
+});
+await order.save();
+}
+
+
+//  Stripe webhoook
+router.post("/webhook",express.json({ type: "application/json" }),async (req, res) => {
+    let data;
+    let eventType;
+
+    // Check if webhook signing is configured.
+    let webhookSecret;
+    //webhookSecret = process.env.STRIPE_WEB_HOOK;
+
+    if (webhookSecret) {
+      // Retrieve the event by verifying the signature using the raw body and secret.
+      let event;
+      let signature = req.headers["stripe-signature"];
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          signature,
+          webhookSecret
+        );
+      } catch (err) {
+        console.log(`⚠️  Webhook signature verification failed:  ${err}`);
+        return res.sendStatus(400);
+      }
+      // Extract the object from the event.
+      data = event.data.object;
+      eventType = event.type;
+    } else {
+      // Webhook signing is recommended, but if the secret is not configured in `config.js`,
+      // retrieve the event data directly from the request body.
+      data = req.body.data.object;
+      eventType = req.body.type;
+    }
+
+    // Handle the checkout.session.completed event
+    if (eventType === "checkout.session.completed") {
+      stripe.customers
+        .retrieve(data.customer)
+        .then(async (customer) => {
+          try {
+            // CREATE ORDER
+            createOrder(customer, data);
+            console.log("payment Saved");
+          } catch (err) {
+            console.log(typeof createOrder);
+            console.log(err);
+          }
+        })
+        .catch((err) => console.log(err.message));
+    }
+
+    res.status(200).end();
+  }
+);
+
+
+
 
 
   module.exports = router
 
 //   `http://localhost:8080${req.body.image}`,
+

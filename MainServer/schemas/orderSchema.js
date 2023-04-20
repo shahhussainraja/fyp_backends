@@ -4,26 +4,49 @@ const orderSchema = new mongoose.Schema(
     {
       products: [
         {
-            productName : String,
-            ProductImage : String,
-            productDetail : String,
-            productAmount : Number,
+          postTitle : String,
+          postDetail : String,
+          amount: Number
         },
       ],
-      payment: {},
-      buyer: {
+      buyerId: {
          type : String,
       },
-      seller:{
+      buyerName: {
+         type : String,
+      },
+      sellerId:{
+        type:String
+      }, 
+      sellerName:{
         type:String
       },
-      status: {
+      totalAmount:{
+        type : String
+      },
+      deliveryAddress:{
+        type:String
+      },
+      city:{
+        type:String
+      },
+      postalCode:{
+        type:String
+      },
+      paymentStatus :{
+        type : String
+      },
+      paymentIntentId :{
+        type : String
+      },
+      orderStatus: {
         type: String,
-        default: "Not Process",
-        enum: ["Not Process", "Processing", "Shipped", "deliverd", "cancel"],
+        default: "Processing",
+        enum: ["Processing", "Shipped", "deliverd", "cancel"],
       },
     },
     { timestamps: true }
   );
   
-module.exports =  mongoose.model("Order", orderSchema);
+orderModel =  mongoose.model("Order", orderSchema);
+module.exports = orderModel;
