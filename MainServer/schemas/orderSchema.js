@@ -6,7 +6,8 @@ const orderSchema = new mongoose.Schema(
         {
           postTitle : String,
           postDetail : String,
-          amount: Number
+          amount: Number,
+          image : String
         },
       ],
       buyerId: {
@@ -42,7 +43,6 @@ const orderSchema = new mongoose.Schema(
       orderStatus: {
         type: String,
         default: "Processing",
-        enum: ["Processing", "Shipped", "deliverd", "cancel"],
       },
     },
     { timestamps: true }

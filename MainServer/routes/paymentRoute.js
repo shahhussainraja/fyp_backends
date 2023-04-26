@@ -20,7 +20,8 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
             sellerName : req.body.sellerName,
             postTitle: req.body.postTitle,
             postDetail: req.body.postDetail,
-            amount:req.body.amount,      
+            amount:req.body.amount,
+            image :req.body.image,      
   }]
     const customer = await stripe.customers.create({
         metadata: {
@@ -74,7 +75,8 @@ const createOrder = async (customer, data) => {
         productsItems.push({
             postTitle:data.postTitle,
             postDetail:data.postDetail,
-            amount : data.amount
+            amount : data.amount,
+            image : data.image
         })
     })
 
@@ -149,6 +151,45 @@ router.post("/webhook",express.json({ type: "application/json" }),async (req, re
     res.status(200).end();
   }
 );
+//for Seller
+router.get("/getSellerAllOrder/:id" , async(req,res)=>{
+  
+  try{
+
+    const result = await orderModel.find({sellerId : req.params.id})
+    res.status(200).send(result);
+  }catch(e){
+    res.status(400).send(e.message);
+
+  }
+})
+//for buyer
+router.get("/getBuyerAllOrder/:id" , async(req,res)=>{
+  
+  try{
+    const result = await orderModel.find({buyerId : req.params.id})
+    res.status(200).send(result);
+  }catch(e){
+    res.status(400).send(e.message);
+
+  }
+})
+
+//for seller
+router.post("/changeOrderStatus/:id", async(req,res)=>{
+
+  try{
+  const result = await orderModel.updateOne({_id : req.params.id},
+    {$set : {
+          "orderStatus" : req.body.status
+    }},{upsert : true});
+    res.status(200).send(result)
+  }catch(e){
+    res.status(400).send(e.messaeg)
+  }
+})
+
+
 
 
 
