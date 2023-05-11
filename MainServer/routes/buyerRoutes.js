@@ -11,12 +11,12 @@ router.post('/signUpAsBuyer', upload.single('image'), async(req,res)=>{
   try{
 
     let data = await buyerCollection.findOne({email : req.body.email})
-    if(data) return res.status(200).send(false); 
+    if(data) return res.status(400).send(false); 
 
     const imagePath = path.join(__dirname, '../public/images');
     const fileUpload = new resize(imagePath);
     if (!req.file) 
-     return res.status(401).json({error: 'Please provide an image'});
+     return res.status(400).json({error: 'Please provide an image'});
   
     const filename = await fileUpload.save(req.file.buffer);
 

@@ -9,7 +9,6 @@ const conversationSchema = new mongodb.Schema({
 {
  timestamps : true
 }
-
 )
 
 module.exports  =  mongodb.model("conversation",conversationSchema);

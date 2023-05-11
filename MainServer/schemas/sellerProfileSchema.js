@@ -16,18 +16,16 @@ const sellerProfile = new mongodb.Schema({
             ProductImage : String,
             productDetail : String,
             productAmount : Number,
-            productStatus : String
+            productStatus : String,
+            productCategory : String,
         }
     ],
     reviews : 
     {
         type : Array
     }
-})
-
-ProfileModel = mongodb.model( "sellerProfile" , sellerProfile );
-
-module.exports = ProfileModel;
+}) 
+module.exports  = mongodb.model( "sellerProfile" , sellerProfile ); 
 
 
 
