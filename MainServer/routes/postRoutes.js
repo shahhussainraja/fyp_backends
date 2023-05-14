@@ -47,6 +47,19 @@ router.get("/fetchAllPost",async(req,res)=>{
     }catch(err){
     }
 
+})
+
+
+ router.get("/fetchAllPost/:id",async(req,res)=>{
+    try{
+        let data = await postCollection.findOne({buyerId : req.params.id});
+        if(!data)
+            return res.status(400).send("No post found")
+        
+        return res.status(200).send(data)
+    }catch(err){
+    }
+
 }) 
  
 module.exports = router

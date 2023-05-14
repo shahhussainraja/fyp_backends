@@ -58,27 +58,90 @@ router.get("/deleteItem",async(req,res)=>{
       res.status(400).send(e.message)
       console.log(e.message)
   }
-
-
 })
 
 
+router.post("/searchData",async(req,res)=>{
+  try{
+
+    if(!req.query.key  && !req.query.Category){  
+        const result = await sellerProfile.find({}).populate("products");
+        console.log("!req.query.key  && !req.query.Category")
+        console.log(result)
+        return res.status(200).send(result)
+      }else if(req.query.key && req.query.Category){
+        console.log("req.query.key  && req.query.Category")
+            const result = await sellerProfile.find({
+              "$and" : [{
+                "products.productName" : {$regex : req.query.key} },
+                  {"products.productCategory" : {$regex : req.query.Category } }]
+                })
+                console.log(result)
+                return res.status(200).send(result);
+          }else if(req.query.key && !req.query.Category ){
+            console.log("req.query.key && !req.query.Category")
+                  const result = await sellerProfile.find({
+                    "$or" : [{
+                      "products.productName" : {$regex : req.query.key} }]
+                      });
+                      console.log(result)
+                      return res.status(200).send(result);
+            }else if(!req.query.key && req.query.Category ){  
+                  const result = await sellerProfile.find({
+                    "$or" : [{
+                      "products.productCategory" : {$regex : req.query.Category} }]
+                      });
+                      console.log(result)
+                      return res.status(200).send(result);
+            }
+     
 
 
 
 
+  //   const result = await sellerProfile.find({},{
+  //       "products" :{
+  //         "$elemMatch":{
+  //              "productName" : req.body.search
+  //       }
+  //     }
+  // })
+  
+  // const result = await sellerProfile.find({
+  //   "$and" : [{
+  //     "products.productName" : {$regex : req.body.search} },
+  //       {"products.productCategory" : {$regex : req.body.productCategory} }]
+  // })
+  res.status(200).send("true") 
+
+  }catch(err){
+    res.status(400).send(err.message);
+    console.log(err.message)
+  }   
+})
 
 
 router.get("/getAllItems/:id",async(req,res)=>{
 
 try{
-  const result = await sellerProfile.findOne({sellerProfileId  : req.params.id}).populate("products");
+  const result = await sellerProfile.find({sellerProfileId  : req.params.id}).populate("products");
   res.status(200).send(result)
 }catch(e){
   res.status(400).send(e.message);
 }
 })
 
+
+//get all product of sellers
+router.get("/getAllProducts",async(req,res)=>{
+
+try{
+  const result = await sellerProfile.find({}).populate("products");
+  res.status(200).send(result)
+}catch(e){
+  res.status(400).send(e.message);
+}
+})
 
 
 

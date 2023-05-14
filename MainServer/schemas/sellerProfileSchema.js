@@ -7,6 +7,9 @@ const sellerProfile = new mongodb.Schema({
         type : String,
         required : true
     },
+    shopeName:{
+        type:String
+    },
     orderAssigned : {
         type : Array
     },
@@ -15,6 +18,7 @@ const sellerProfile = new mongodb.Schema({
             productName : String,
             ProductImage : String,
             productDetail : String,
+            productExtraInformation : String,
             productAmount : Number,
             productStatus : String,
             productCategory : String,

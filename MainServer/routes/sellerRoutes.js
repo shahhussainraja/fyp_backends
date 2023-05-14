@@ -37,6 +37,7 @@ router.post('/signUpAsSeller', upload.single('image'), async(req,res)=>{
     //Creating seller profile
     const profile  = new sellerProfile;
     profile.sellerProfileId = seller._id;
+    profile.shopName = seller.shopName;
     await profile.save()
 
     return res.status(200).send(seller + "seller Saved and profile " + profile)

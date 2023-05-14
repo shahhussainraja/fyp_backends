@@ -50,8 +50,6 @@ const post = new mongodb.Schema({
     }
 })
  
+module.exports  =  mongodb.model("post",post);
 
-postModel = mongodb.model("post",post);
-
-module.exports  = postModel
 
