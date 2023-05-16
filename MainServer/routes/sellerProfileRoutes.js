@@ -5,9 +5,9 @@ const path = require('path');
 const upload = require("../middleWare/multer");
 const resize = require('../middleWare/resize');
 const sellerProfile = require("../schemas/sellerProfileSchema")
+const auth = require("../middleWare/auth")
 
-
-router.post('/addProduct',upload.single('image'), async(req,res)=>{
+router.post('/addProduct',upload.single('image'),auth, async(req,res)=>{
   try{
 
     const imagePath = path.join(__dirname, '../public/images');
@@ -43,8 +43,7 @@ router.post('/addProduct',upload.single('image'), async(req,res)=>{
 
 
 
-router.get("/deleteItem",async(req,res)=>{
-
+router.get("/deleteItem",auth,async(req,res)=>{
   try{
       const result = await sellerProfile.updateOne({sellerProfileId  : req.query.sellerId},{
         "$pull" : {
@@ -61,7 +60,7 @@ router.get("/deleteItem",async(req,res)=>{
 })
 
 
-router.post("/searchData",async(req,res)=>{
+router.post("/searchData",auth,async(req,res)=>{
   try{
 
     if(!req.query.key  && !req.query.Category){  
@@ -94,11 +93,6 @@ router.post("/searchData",async(req,res)=>{
                       console.log(result)
                       return res.status(200).send(result);
             }
-     
-
-
-
-
   //   const result = await sellerProfile.find({},{
   //       "products" :{
   //         "$elemMatch":{
@@ -113,7 +107,6 @@ router.post("/searchData",async(req,res)=>{
   //       {"products.productCategory" : {$regex : req.body.productCategory} }]
   // })
   res.status(200).send("true") 
-
   }catch(err){
     res.status(400).send(err.message);
     console.log(err.message)
@@ -121,8 +114,7 @@ router.post("/searchData",async(req,res)=>{
 })
 
 
-router.get("/getAllItems/:id",async(req,res)=>{
-
+router.get("/getAllItems/:id",auth ,async(req,res)=>{
 try{
   const result = await sellerProfile.find({sellerProfileId  : req.params.id}).populate("products");
   res.status(200).send(result)
@@ -133,8 +125,7 @@ try{
 
 
 //get all product of sellers
-router.get("/getAllProducts",async(req,res)=>{
-
+router.get("/getAllProducts",auth,async(req,res)=>{
 try{
   const result = await sellerProfile.find({}).populate("products");
   res.status(200).send(result)
@@ -142,6 +133,16 @@ try{
   res.status(400).send(e.message);
 }
 })
+
+router.get("/getAllReviews/:id",auth,async(req,res)=>{
+  try{
+    const result = await sellerProfile.find({sellerProfileId  : req.params.id}).populate("reviews");
+    res.status(200).send(result)
+  }catch(e){
+    res.status(400).send(e.message);
+  }
+})
+
 
 
 

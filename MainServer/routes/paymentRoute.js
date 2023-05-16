@@ -4,14 +4,14 @@ const orderModel = require("../schemas/orderSchema");
 const { string } = require('joi');
 require('dotenv').config({path: __dirname + '/.env'})
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-
-
-
+const auth = require("../middleWare/auth")
+const sellerProfile = require("../schemas/sellerProfileSchema")
+const mongoose = require("mongoose");
 //for event trigger webhook
 // stripe listen --forward-to localhost:8080/bespoke/webhook
 //Run his command on your powershell
 
- router.post("/makePayment",async(req,res)=>{
+ router.post("/makePayment",auth,async(req,res)=>{
     
     let orderDetail = [{
             buyerId:req.body.buyerId,
@@ -152,7 +152,7 @@ router.post("/webhook",express.json({ type: "application/json" }),async (req, re
   }
 );
 //for Seller
-router.get("/getSellerAllOrder/:id" , async(req,res)=>{
+router.get("/getSellerAllOrder/:id" ,auth, async(req,res)=>{
   
   try{
 
@@ -164,7 +164,7 @@ router.get("/getSellerAllOrder/:id" , async(req,res)=>{
   }
 })
 //for buyer
-router.get("/getBuyerAllOrder/:id" , async(req,res)=>{
+router.get("/getBuyerAllOrder/:id" ,auth, async(req,res)=>{
   
   try{
     const result = await orderModel.find({buyerId : req.params.id})
@@ -176,7 +176,7 @@ router.get("/getBuyerAllOrder/:id" , async(req,res)=>{
 })
 
 //for seller
-router.post("/changeOrderStatus/:id", async(req,res)=>{
+router.post("/changeOrderStatus/:id",auth, async(req,res)=>{
 
   try{
   const result = await orderModel.updateOne({_id : req.params.id},
@@ -189,10 +189,28 @@ router.post("/changeOrderStatus/:id", async(req,res)=>{
   }
 })
 
+router.post("/AddReview/:id",async(req,res)=>{
+  
+  try{
+    // const result = await orderModel.findByIdAndUpdate({"_id" : req.params.id},{
+    //   review : req.body.review
+    // })
+    
+    const result = await orderModel.findOne({"_id" : req.params.id})
+    result.review =req.body.review
+    result.save();
 
-
-
-
+    await sellerProfile.findOneAndUpdate({ "sellerProfileId" : result.sellerId},{
+        "$push":{
+          "reviews" : result
+        }
+      })
+    res.status(200).send("Data Saved");  
+  }catch(e){
+    res.status(400).send(e.message);
+    console.log(e.message)
+  }
+})
 
 
   module.exports = router

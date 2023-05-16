@@ -44,9 +44,13 @@ const orderSchema = new mongoose.Schema(
         type: String,
         default: "Processing",
       },
+      review : {
+        type : String,
+        default : "false" 
+      }
     },
     { timestamps: true }
   );
   
-orderModel =  mongoose.model("Order", orderSchema);
-module.exports = orderModel;
+
+module.exports =  mongoose.model("Order", orderSchema);

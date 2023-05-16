@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
 const conversation = require("../schemas/Conversation");
+const auth = require("../middleWare/auth")
 
 
 //new Conversation 
 
-router.post("/newConversation", async(req, res)=>{
+router.post("/newConversation",auth, async(req, res)=>{
 
     try {
         const fetchConverstion = await conversation.find({
@@ -31,7 +32,7 @@ router.post("/newConversation", async(req, res)=>{
 });
 
 
-router.get("/conversation/:userId", async(req, res)=>{
+router.get("/conversation/:userId",auth, async(req, res)=>{
     try{
         const fetchConverstion = await conversation.find({
             members :{ $in: [req.params.userId]}

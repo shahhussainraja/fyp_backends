@@ -6,6 +6,8 @@ const resize = require('../middleWare/resize');
 const buyerCollection  = require("../schemas/buyerSchema")
 var bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const auth = require("../middleWare/auth")
+
 
 router.post('/signUpAsBuyer', upload.single('image'), async(req,res)=>{
   try{
@@ -40,10 +42,10 @@ router.post("/signInAsBuyer",async (req, res)=>{
   try{
 
     let buyer = await buyerCollection.findOne({ email : req.body.email })
-    if(!buyer) return res.status(401).send(false)
+    if(!buyer) return res.status(410).send(false)
 
     let isValid = await bcrypt.compare(req.body.password, buyer.password)
-    if(!isValid) return res.status(401).send(false)
+    if(!isValid) return res.status(410).send(false)
 
     let payload = {
       id : buyer._id,
@@ -54,18 +56,20 @@ router.post("/signInAsBuyer",async (req, res)=>{
       userType : buyer.userType
     }
 
-    let token  = jwt.sign(payload,process.env.jwtkey)
+    //token will Expire in 7 days
+    // ath.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)
+    let token  = jwt.sign(payload,process.env.jwtkey,{expiresIn : Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)})
     res.status(200).send({token : token ,payload : payload})
     console.log(req.body.email + "buyer login ");
 
-  }catch(err){  
+  }catch(err){      
     console.log(err.message)
     res.status(400).send(err.message)
   }
 
 })
 
-  router.get("/buyerDetail/:buyerId", async(req,res)=>{
+  router.get("/buyerDetail/:buyerId",auth, async(req,res)=>{
    try{
     let id = req.params.buyerId;
     let data  = await buyerCollection.findById(id)
@@ -78,7 +82,7 @@ router.post("/signInAsBuyer",async (req, res)=>{
   }   
   })
 
-  router.get("/currentUser" ,async (req ,res)=>{
+  router.get("/currentUser" ,auth ,async (req ,res)=>{
       //check provide  in header
       let token = req.headers["token"];
       if (!token) return res.status(400).send("Token is no Provided");

@@ -7,8 +7,9 @@ const sellerCollection  = require("../schemas/sellerSchema");
 const sellerProfile = require("../schemas/sellerProfileSchema")
 var bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const auth = require("../middleWare/auth")
 
-router.post('/signUpAsSeller', upload.single('image'), async(req,res)=>{
+router.post('/signUpAsSeller',upload.single('image'), async(req,res)=>{
   try{
 
     let data = await sellerCollection.findOne({email : req.body.email})
@@ -51,10 +52,10 @@ router.post("/signInAsSeller",async (req, res)=>{
   try{
 
     let seller = await sellerCollection.findOne({ email : req.body.email })
-    if(!seller) return res.status(401).send(false)
+    if(!seller) return res.status(410).send(false)
 
     let isValid = await bcrypt.compare(req.body.password, seller.password)
-    if(!isValid) return res.status(401).send(false)
+    if(!isValid) return res.status(410).send(false)
 
     let payload = {
       id : seller._id,
@@ -66,7 +67,7 @@ router.post("/signInAsSeller",async (req, res)=>{
     }
     
 
-    let token  = jwt.sign(payload,process.env.jwtkey)
+    let token  = jwt.sign(payload,process.env.jwtkey,{expiresIn: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60)})
     res.status(200).send({token : token ,payload : payload})
     console.log(req.body.email + "Seller login ");
 
@@ -77,7 +78,7 @@ router.post("/signInAsSeller",async (req, res)=>{
 
 })
 
-  router.get("/sellerDetail/:sellerId", async(req,res)=>{
+  router.get("/sellerDetail/:sellerId",auth, async(req,res)=>{
    try{
     let id = req.params.sellerId;
     let data  = await sellerCollection.findById(id)
@@ -91,7 +92,7 @@ router.post("/signInAsSeller",async (req, res)=>{
   })
 
 
-  router.get("/currentUser" ,async (req ,res)=>{
+  router.get("/currentUser",auth,async (req ,res)=>{
       //check provide  in header
       let token = req.headers["token"];
       if (!token) return res.send("Token is no Provided");

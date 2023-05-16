@@ -6,8 +6,9 @@ const resize = require('../middleWare/resize');
 const postCollection  = require("../schemas/postSchema")
 var bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const auth = require("../middleWare/auth")
 
-router.post("/uploadPost",upload.single("image"),async(req, res)=>{
+router.post("/uploadPost",upload.single("image"),auth,async(req, res)=>{
     try{
     const imagePath = path.join(__dirname, '../public/images');
     const fileUpload = new resize(imagePath);
@@ -37,7 +38,70 @@ router.post("/uploadPost",upload.single("image"),async(req, res)=>{
     }
 })
 
-router.get("/fetchAllPost",async(req,res)=>{
+
+router.post("/searchJobs",auth,async(req,res)=>{
+    try{
+  
+      if(!req.query.key  && !req.query.Category){  
+          const result = await postCollection.find({})  
+          console.log("!req.query.key  && !req.query.Category")
+          console.log(result)
+          return res.status(200).send(result)
+        }else if(req.query.key && req.query.Category){
+          console.log("req.query.key  && req.query.Category")
+              const result = await postCollection.find({
+                "$and" : [{
+                  "postTitle" : {$regex : req.query.key} },
+                    {"category" : {$regex : req.query.Category } }]
+                  })
+                  return res.status(200).send(result);
+            }else if(req.query.key && !req.query.Category ){
+              console.log("req.query.key && !req.query.Category")
+                    const result = await postCollection.find({
+                      "$or" : [{
+                        "postTitle" : {$regex : req.query.key} }]
+                        });
+                        return res.status(200).send(result);
+              }else if(!req.query.key && req.query.Category ){  
+                    const result = await postCollection.find({
+                      "$or" : [{
+                        "category" : {$regex : req.query.Category} }]
+                        });
+                        return res.status(200).send(result);
+              }
+    //   const result = await sellerProfile.find({},{
+    //       "products" :{
+    //         "$elemMatch":{
+    //              "productName" : req.body.search
+    //       }
+    //     }
+    // })
+    
+    // const result = await sellerProfile.find({
+    //   "$and" : [{
+    //     "products.productName" : {$regex : req.body.search} },
+    //       {"products.productCategory" : {$regex : req.body.productCategory} }]
+    // })
+    res.status(200).send("true") 
+    }catch(err){
+      res.status(400).send(err.message);
+      console.log(err.message)
+    }   
+  })
+  
+
+
+
+
+
+
+
+
+
+
+
+
+router.get("/fetchAllPost",auth,async(req,res)=>{
     try{
         let data = await postCollection.find();
         if(!data)
@@ -50,7 +114,7 @@ router.get("/fetchAllPost",async(req,res)=>{
 })
 
 
- router.get("/fetchAllPost/:id",async(req,res)=>{
+ router.get("/fetchAllPost/:id",auth,async(req,res)=>{
     try{
         let data = await postCollection.findOne({buyerId : req.params.id});
         if(!data)

@@ -1,10 +1,10 @@
 var express = require('express');
 var router = express.Router();
 const message = require("../schemas/message")
-
+const auth = require("../middleWare/auth")
 
 //new messsage 
-router.post("/sendMessage", async(req, res)=>{
+router.post("/sendMessage",auth, async(req, res)=>{
 
     try{    
         const newMessage = new message(req.body)
@@ -18,7 +18,7 @@ router.post("/sendMessage", async(req, res)=>{
 });
 
 //send message
-router.get("/fetchMessage/:userId", async(req, res)=>{
+router.get("/fetchMessage/:userId",auth, async(req, res)=>{
 
     try{    
         const fetchMessages = await message.find({
