@@ -1,4 +1,4 @@
-const { number } = require("joi");
+const { number, string } = require("joi");
 const mongodb = require("mongoose");
 
 
@@ -19,6 +19,10 @@ const messageSchema = new mongodb.Schema({
 
 
     //this Scheme here form Payment purpose through Stripe
+    postId : {
+        type : String,
+        default : null
+    },
     sellerId :{
         type:String,
         default:null

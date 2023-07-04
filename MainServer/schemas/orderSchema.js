@@ -23,7 +23,7 @@ const orderSchema = new mongoose.Schema(
         type:String
       },
       totalAmount:{
-        type : String
+        type : Number
       },
       deliveryAddress:{
         type:String
@@ -44,10 +44,17 @@ const orderSchema = new mongoose.Schema(
         type: String,
         default: "Processing",
       },
+      shopeName :{
+        type: String,
+      },
       review : {
         type : String,
         default : "false" 
+      },
+      postId :{
+        type : String ,
       }
+
     },
     { timestamps: true }
   );

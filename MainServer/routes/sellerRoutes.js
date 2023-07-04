@@ -56,6 +56,9 @@ router.post("/signInAsSeller",async (req, res)=>{
 
     let isValid = await bcrypt.compare(req.body.password, seller.password)
     if(!isValid) return res.status(410).send(false)
+    if(buyer.userStatus !== "active"){
+      return res.status(411).send(false)
+    }
 
     let payload = {
       id : seller._id,

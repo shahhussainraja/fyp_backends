@@ -90,20 +90,9 @@ router.post("/searchJobs",auth,async(req,res)=>{
   })
   
 
-
-
-
-
-
-
-
-
-
-
-
 router.get("/fetchAllPost",auth,async(req,res)=>{
     try{
-        let data = await postCollection.find();
+        let data = await postCollection.find().sort("-1");
         if(!data)
             return res.status(400).send("No post found")
         
@@ -114,9 +103,9 @@ router.get("/fetchAllPost",auth,async(req,res)=>{
 })
 
 
- router.get("/fetchAllPost/:id",auth,async(req,res)=>{
+ router.get("/fetchPost/:id",auth,async(req,res)=>{
     try{
-        let data = await postCollection.findOne({buyerId : req.params.id});
+        let data = await postCollection.find({buyerId : req.params.id});
         if(!data)
             return res.status(400).send("No post found")
         
@@ -125,5 +114,20 @@ router.get("/fetchAllPost",auth,async(req,res)=>{
     }
 
 }) 
+
+router.get("/deletPost/:id",auth,async(req,res)=>{
+  console.log(req.params.id)
+    try{
+        let data = await postCollection.findByIdAndDelete({_id : req.params.id});
+        if(!data)
+            return res.status(400).send("No post found")
+        return res.status(200).send(data)
+    }catch(err){
+    }
+
+}) 
+
+
+
  
 module.exports = router

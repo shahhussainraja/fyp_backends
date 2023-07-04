@@ -47,6 +47,10 @@ const post = new mongodb.Schema({
     Status:{
       type:String,
       default:"open"
+    },
+    orderType :{
+      type : String,
+      default : "customized"
     }
 })
  

@@ -24,6 +24,10 @@ const buyer = new mongodb.Schema({
   userType: {
     type: String,
     default: "buyer"
+  },
+  userStatus:{
+    type: String,
+    default : "active"
   }
 })
 
@@ -38,8 +42,5 @@ buyer.methods.generateHashedPassword = async function () {
 
 };
 
-
-buyerModel = mongodb.model("buyer", buyer);
-
-module.exports = buyerModel
+module.exports = mongodb.model("buyer", buyer);
 

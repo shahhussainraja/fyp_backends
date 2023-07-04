@@ -34,7 +34,11 @@ const seller = new mongodb.Schema({
     userType : {
         type : String ,
         default  : "seller"
-    }
+    },
+    userStatus:{
+        type: String,
+        default : "active"
+      }
 
 })
 
@@ -49,9 +53,8 @@ seller.methods.generateHashedPassword = async function() {
   
 };
 
-sellerModel = mongodb.model("seller", seller );
+module.exports = mongodb.model("seller", seller );
 
-module.exports = sellerModel;
 
 
 
