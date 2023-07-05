@@ -69,19 +69,6 @@ router.post("/searchJobs",auth,async(req,res)=>{
                         });
                         return res.status(200).send(result);
               }
-    //   const result = await sellerProfile.find({},{
-    //       "products" :{
-    //         "$elemMatch":{
-    //              "productName" : req.body.search
-    //       }
-    //     }
-    // })
-    
-    // const result = await sellerProfile.find({
-    //   "$and" : [{
-    //     "products.productName" : {$regex : req.body.search} },
-    //       {"products.productCategory" : {$regex : req.body.productCategory} }]
-    // })
     res.status(200).send("true") 
     }catch(err){
       res.status(400).send(err.message);
@@ -92,10 +79,17 @@ router.post("/searchJobs",auth,async(req,res)=>{
 
 router.get("/fetchAllPost",auth,async(req,res)=>{
     try{
-        let data = await postCollection.find().sort("-1");
+        let data = await postCollection.aggregate([
+          {
+            $sort : {
+              createdAt : -1
+            }
+          }
+        ])
         if(!data)
             return res.status(400).send("No post found")
         
+        console.log(data)
         return res.status(200).send(data)
     }catch(err){
     }

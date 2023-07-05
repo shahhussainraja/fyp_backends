@@ -51,6 +51,9 @@ const orderSchema = new mongoose.Schema(
         type : String,
         default : "false" 
       },
+      reviewRating:{
+        type : Number,
+      },
       postId :{
         type : String ,
       }

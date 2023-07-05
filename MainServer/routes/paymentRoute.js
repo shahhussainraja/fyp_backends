@@ -78,7 +78,7 @@ const createOrder = async (customer, data) => {
         productsItems.push({
             postTitle:data.postTitle,
             postDetail:data.postDetail,
-            amount : data.amount,
+            amount : parseInt(data.amount),
             image : data.image
         })
     })
@@ -91,7 +91,7 @@ const createOrder = async (customer, data) => {
         postId : orderDetail[0]?.postId,
         paymentIntentId: data.payment_intent,
         products:productsItems,
-        totalAmount: data.amount_total,
+        totalAmount: parseInt(data.amount_total),
         deliveryAddress: data.customer_details?.address.line1,
         city:data.customer_details?.address.city,
         postalCode:data.customer_details?.address.postal_code,
@@ -139,7 +139,7 @@ const createCartOrder = async (customer, stripData) => {
   orderList.map(async(data)=>{
     
     let productItems = []
-    let totalAmount =0 ; 
+    let totalAmount = 0 ; 
     let buyerId;
     let sellerId;
     let shopeName;
@@ -149,7 +149,7 @@ const createCartOrder = async (customer, stripData) => {
           amount : singleProduct.pA,
       })
 
-      totalAmount += singleProduct.pA * 100;
+      totalAmount += singleProduct.pA ;
       buyerId = singleProduct.bId;
       sellerId = singleProduct.sId;
       shopeName = singleProduct.sN
@@ -161,7 +161,7 @@ const createCartOrder = async (customer, stripData) => {
       sellerId : sellerId,
       shopeName:shopeName,
       products: productItems,
-      totalAmount: totalAmount,
+      totalAmount: parseInt(totalAmount),
       paymentIntentId: stripData.payment_intent,
       deliveryAddress: stripData.customer_details?.address.line1,
       city:stripData.customer_details?.address.city,
@@ -290,19 +290,17 @@ router.post("/changeOrderStatus/:id",auth, async(req,res)=>{
 router.post("/AddReview/:id",async(req,res)=>{
   
   try{
-    // const result = await orderModel.findByIdAndUpdate({"_id" : req.params.id},{
-    //   review : req.body.review
-    // })
-    
-    const result = await orderModel.findOne({"_id" : req.params.id})
-    result.review =req.body.review
-    result.save();
 
+    const result = await orderModel.findOne({"_id" : req.params.id})
+    result.review = req.body.review;
+    result.reviewRating = req.body.ratingValue; 
+    await result.save();
+    
     await sellerProfile.findOneAndUpdate({ "sellerProfileId" : result.sellerId},{
-        "$push":{
-          "reviews" : result
-        }
-      })
+      "$push":{
+        "reviews" : result
+      }
+    })
     res.status(200).send("Data Saved");  
   }catch(e){
     res.status(400).send(e.message);
